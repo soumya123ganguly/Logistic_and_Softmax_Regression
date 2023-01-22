@@ -1,6 +1,7 @@
 import numpy as np
 import data
 import time
+import math
 # import tqdm
 
 """
@@ -61,7 +62,8 @@ def binary_cross_entropy(y, t):
     float 
         binary cross entropy loss value according to above definition
     """
-    return t*np.log(y)+(1-t)*np.log(1-y)
+
+    return t*np.log(y+1e-15)+(1-t)*np.log(1-y+1e-15)
 
 def multiclass_cross_entropy(y, t):
     """
@@ -148,14 +150,13 @@ class Network:
             accuracy over minibatch
         """
         X, y = minibatch
-        print(X.shape)
         X = data.append_bias(X)
-        print(X.shape)
         p = self.forward(X)
-        loss = self.loss(y, p)
+        loss = self.loss(p, y)
         avg_loss = loss.mean()
-        avg_acc = np.where(y == p, 1, 0).mean()
-        self.weights -= self.hyperparameters.learning_rate*X.dot(loss)
+        avg_acc = np.where(y == np.rint(p), 1, 0).mean()
+        print(self.weights)
+        self.weights += self.hyperparameters.learning_rate*X.T.dot(loss)/self.hyperparameters.batch_size
         return avg_loss, avg_acc
 
     def test(self, minibatch):
@@ -180,6 +181,6 @@ class Network:
         X, y = minibatch
         X = data.append_bias(X)
         p = self.forward(X)
-        avg_loss = self.loss(y, p).mean()
+        avg_loss = self.loss(p, y).mean()
         avg_acc = np.where(y == p, 1, 0).mean()
         return avg_loss, avg_acc

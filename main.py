@@ -10,8 +10,16 @@ import matplotlib.pyplot as plot
 def main(hyperparameters):
     pca = PCA(n_components = hyperparameters.p)
     train_data, train_labels = data.load_data("data/")
+    idx27 = np.where(np.logical_or(train_labels == 2, train_labels == 7))
+    train_data = train_data[idx27]
+    train_labels = train_labels[idx27]
+    train_labels = np.where(train_labels == 2, 1, 0).reshape(-1, 1)
     train_data = train_data.reshape(len(train_data), -1)
     test_data, test_labels = data.load_data("data/", train=False)
+    idx27 = np.where(np.logical_or(test_labels == 2, test_labels == 7))
+    test_data = test_data[idx27]
+    test_labels = test_labels[idx27]
+    test_labels = np.where(test_labels == 2, 1, 0).reshape(-1, 1)
     test_data = test_data.reshape(len(test_data), -1)
     train_data_pca = pca.fit_transform(train_data)
     test_data_pca = pca.transform(test_data)
@@ -25,19 +33,22 @@ def main(hyperparameters):
         val_losses = []
         for _ in tqdm(range(hyperparameters.epochs)):
                 train_acc, train_loss = 0, 0
-                for _ in range(len(train_folds)//hyperparameters.batch_size):
-                        train_acc_batch, train_loss_batch = net.train(train_folds)
+                for _ in range(len(train_folds[0])//hyperparameters.batch_size):
+                        mb_train_folds = next(data.generate_minibatches(train_folds))
+                        train_loss_batch, train_acc_batch = net.train(mb_train_folds)
                         train_acc += train_acc_batch
                         train_loss += train_loss_batch
-                train_acc /= len(train_folds)
-                train_loss /= len(train_folds)
+                train_acc /= (len(train_folds[0])//hyperparameters.batch_size)
+                train_loss /= (len(train_folds[0])//hyperparameters.batch_size)
+                print(train_acc)
                 val_acc, val_loss = 0, 0
-                for _ in range(len(val_fold)/hyperparameters.batch_size):
-                        val_acc_batch, val_loss_batch = net.train(val_fold)
+                for _ in range(len(val_fold[0])//hyperparameters.batch_size):
+                        mb_val_fold = next(data.generate_minibatches(val_fold))
+                        val_loss_batch, val_acc_batch = net.test(mb_val_fold)
                         val_acc += val_acc_batch
                         val_loss += val_loss_batch
-                val_acc /= len(val_fold)
-                val_loss /= len(val_fold)
+                val_acc /= (len(val_fold[0])//hyperparameters.batch_size)
+                val_loss /= (len(val_fold[0])//hyperparameters.batch_size)
                 train_losses.append(train_loss)
                 val_losses.append(val_loss)
         plot.plot(np.arange(len(train_losses)), train_losses)
