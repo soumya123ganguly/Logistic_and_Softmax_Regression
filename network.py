@@ -1,7 +1,7 @@
 import numpy as np
 import data
 import time
-import tqdm
+# import tqdm
 
 """
 NOTE
@@ -104,7 +104,7 @@ class Network:
         self.activation = activation
         self.loss = loss
 
-        self.weights = np.zeros((32*32+1, out_dim))
+        self.weights = np.zeros((101, out_dim))
 
     def forward(self, X):
         """
@@ -124,7 +124,7 @@ class Network:
         X
             Patterns to create outputs for
         """
-        return self.activation(self.weights.T.dot(X))
+        return self.activation(X.dot(self.weights))
 
     def __call__(self, X):
         return self.forward(X)
@@ -148,12 +148,14 @@ class Network:
             accuracy over minibatch
         """
         X, y = minibatch
+        print(X.shape)
         X = data.append_bias(X)
+        print(X.shape)
         p = self.forward(X)
         loss = self.loss(y, p)
         avg_loss = loss.mean()
         avg_acc = np.where(y == p, 1, 0).mean()
-        self.weights -= self.hyperparameters['learning_rate']*X.dot(loss)
+        self.weights -= self.hyperparameters.learning_rate*X.dot(loss)
         return avg_loss, avg_acc
 
     def test(self, minibatch):
