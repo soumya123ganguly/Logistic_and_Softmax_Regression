@@ -163,7 +163,7 @@ def append_bias(X):
         2d numpy array with shape ((N+1),d)
     """
     N = len(X)
-    return np.hstack((X, np.zeros((N, 1))))
+    return np.hstack((X, np.ones((N, 1))))
 
 def generate_minibatches(dataset, batch_size=64):
     X, y = dataset

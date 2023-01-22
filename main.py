@@ -36,21 +36,23 @@ def main(hyperparameters):
                 for _ in range(len(train_folds[0])//hyperparameters.batch_size):
                         mb_train_folds = next(data.generate_minibatches(train_folds))
                         train_loss_batch, train_acc_batch = net.train(mb_train_folds)
+                        train_losses.append(train_loss_batch)
                         train_acc += train_acc_batch
                         train_loss += train_loss_batch
                 train_acc /= (len(train_folds[0])//hyperparameters.batch_size)
                 train_loss /= (len(train_folds[0])//hyperparameters.batch_size)
-                print(train_acc)
                 val_acc, val_loss = 0, 0
                 for _ in range(len(val_fold[0])//hyperparameters.batch_size):
                         mb_val_fold = next(data.generate_minibatches(val_fold))
                         val_loss_batch, val_acc_batch = net.test(mb_val_fold)
+                        val_losses.append(val_loss_batch)
                         val_acc += val_acc_batch
                         val_loss += val_loss_batch
                 val_acc /= (len(val_fold[0])//hyperparameters.batch_size)
                 val_loss /= (len(val_fold[0])//hyperparameters.batch_size)
-                train_losses.append(train_loss)
-                val_losses.append(val_loss)
+                # train_losses.append(train_loss)
+                # val_losses.append(val_loss)
+                print(val_acc, train_acc, train_loss, val_loss)
         plot.plot(np.arange(len(train_losses)), train_losses)
         plot.plot(np.arange(len(val_losses)), val_losses)
         plot.show()

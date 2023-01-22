@@ -43,7 +43,7 @@ def softmax(a):
     float
        Value after applying softmax (z from the slides).
     """
-    return np.exp(a)/np.sum(np.exp(a), axis=1)
+    return np.exp(a)/np.sum(np.exp(a), axis=1)[:, None]
 
 def binary_cross_entropy(y, t):
     """
@@ -63,7 +63,7 @@ def binary_cross_entropy(y, t):
         binary cross entropy loss value according to above definition
     """
 
-    return t*np.log(y+1e-15)+(1-t)*np.log(1-y+1e-15)
+    return -(t*np.log(y+1e-15)+(1-t)*np.log(1-y+1e-15))
 
 def multiclass_cross_entropy(y, t):
     """
@@ -149,14 +149,15 @@ class Network:
             average loss over minibatch
             accuracy over minibatch
         """
+        lr = self.hyperparameters.learning_rate
+        bs = self.hyperparameters.batch_size
         X, y = minibatch
         X = data.append_bias(X)
         p = self.forward(X)
-        loss = self.loss(p, y)
-        avg_loss = loss.mean()
-        avg_acc = np.where(y == np.rint(p), 1, 0).mean()
-        print(self.weights)
-        self.weights += self.hyperparameters.learning_rate*X.T.dot(loss)/self.hyperparameters.batch_size
+        avg_loss = self.loss(p, y).mean()
+        pred = np.where(p > 0.5, 1, 0)
+        avg_acc = np.where(y == pred, 1, 0).mean()
+        self.weights += lr*X.T.dot(y-p)/bs
         return avg_loss, avg_acc
 
     def test(self, minibatch):
@@ -182,5 +183,6 @@ class Network:
         X = data.append_bias(X)
         p = self.forward(X)
         avg_loss = self.loss(p, y).mean()
-        avg_acc = np.where(y == p, 1, 0).mean()
+        pred = np.where(p > 0.5, 1, 0)
+        avg_acc = np.where(y == pred, 1, 0).mean()
         return avg_loss, avg_acc
