@@ -62,7 +62,6 @@ def binary_cross_entropy(y, t):
     float 
         binary cross entropy loss value according to above definition
     """
-
     return -(t*np.log(y+1e-15)+(1-t)*np.log(1-y+1e-15))
 
 def multiclass_cross_entropy(y, t):
@@ -82,7 +81,7 @@ def multiclass_cross_entropy(y, t):
     float 
         multiclass cross entropy loss value according to above definition
     """
-    return -np.sum(t*np.log(y), axis=1)
+    return -np.sum(t*np.log(y+1e-15), axis=1)
 
 class Network:
     def __init__(self, hyperparameters, activation, loss, out_dim):
@@ -106,7 +105,7 @@ class Network:
         self.activation = activation
         self.loss = loss
 
-        self.weights = np.zeros((101, out_dim))
+        self.weights = np.zeros((self.hyperparameters.p+1, out_dim))
 
     def forward(self, X):
         """
