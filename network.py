@@ -151,7 +151,6 @@ class Network:
         lr = self.hyperparameters.learning_rate
         bs = self.hyperparameters.batch_size
         X, y = minibatch
-        X = data.append_bias(X)
         p = self.forward(X)
         avg_loss = self.loss(p, y).mean()
         pred = np.where(p > 0.5, 1, 0)
@@ -179,7 +178,6 @@ class Network:
                 accuracy over minibatch
         """
         X, y = minibatch
-        X = data.append_bias(X)
         p = self.forward(X)
         avg_loss = self.loss(p, y).mean()
         pred = np.where(p > 0.5, 1, 0)
