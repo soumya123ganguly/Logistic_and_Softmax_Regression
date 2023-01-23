@@ -153,9 +153,10 @@ class Network:
         X, y = minibatch
         p = self.forward(X)
         avg_loss = self.loss(p, y).mean()
-        pred = np.where(p > 0.5, 1, 0)
-        avg_acc = np.where(y == pred, 1, 0).mean()
         self.weights += lr*X.T.dot(y-p)/bs
+        y = data.onehot_decode(y)
+        pred = np.argmax(p, axis=1)+1
+        avg_acc = np.where(y == pred, 1, 0).mean()
         return avg_loss, avg_acc
 
     def test(self, minibatch):
@@ -180,6 +181,7 @@ class Network:
         X, y = minibatch
         p = self.forward(X)
         avg_loss = self.loss(p, y).mean()
-        pred = np.where(p > 0.5, 1, 0)
+        y = data.onehot_decode(y)
+        pred = np.argmax(p, axis=1)+1
         avg_acc = np.where(y == pred, 1, 0).mean()
         return avg_loss, avg_acc
