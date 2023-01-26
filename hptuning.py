@@ -1,9 +1,11 @@
 import main
 
+# Define the hyperparameters to be searched
 p = [5, 10, 50, 100]
 batch_size = [64, 128, 256]
 lr = [0.1, 0.01, 0.001]
 
+# Define a Hyperparameter object
 class HP:
     def __init__(self, batch_size, epochs, learning_rate, k_folds, p):
         self.batch_size = batch_size
@@ -17,6 +19,7 @@ class HP:
     def __repr__(self):
         return f'Hp(batch_size={self.batch_size}, learning_rate={self.learning_rate}, p={self.p})'
 
+# Iterate over all possible hyperparameters to search for the optimal hyper parameter
 best_hp = None
 best_acc = -1
 for pi in p:

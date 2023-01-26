@@ -43,7 +43,10 @@ def softmax(a):
     float
        Value after applying softmax (z from the slides).
     """
-    return np.exp(a)/np.sum(np.exp(a), axis=1)[:, None]
+    smax = np.exp(a)/np.sum(np.exp(a), axis=1)[:, None]
+    # Sanity check to verify that all the softmax values in a column sum to 1.
+    # assert(np.logical_and(np.sum(smax, axis=1) < 1.1, np.sum(smax, axis=1) > 0.9).all())
+    return smax
 
 def binary_cross_entropy(y, t):
     """
@@ -148,15 +151,22 @@ class Network:
             average loss over minibatch
             accuracy over minibatch
         """
+        # get the hyperparameters
         lr = self.hyperparameters.learning_rate
         bs = self.hyperparameters.batch_size
         X, y = minibatch
+        # Compute the forward propogation of X.
         p = self.forward(X)
+        # Compute the mean loss
         avg_loss = self.loss(p, y).mean()
+        # Update the gradient weights
         self.weights += lr*X.T.dot(y-p)/bs
+        # Used for computing binary classification accuracy
         #pred = np.where(p > 0.5, 1, 0)
+        # Used for computing multiclass classification accuracy
         y = data.onehot_decode(y)
         pred = np.argmax(p, axis=1)+1
+        # Compute the mean accuracy
         avg_acc = np.where(y == pred, 1, 0).mean()
         return avg_loss, avg_acc
 
@@ -180,10 +190,15 @@ class Network:
                 accuracy over minibatch
         """
         X, y = minibatch
+        # Compute the forward propogation of X.
         p = self.forward(X)
+        # Compute the mean loss
         avg_loss = self.loss(p, y).mean()
+        # Used for computing binary classification accuracy
         #pred = np.where(p > 0.5, 1, 0)
+        # Used for computing multiclass classification accuracy
         y = data.onehot_decode(y)
         pred = np.argmax(p, axis=1)+1
+        # Compute the mean accuracy
         avg_acc = np.where(y == pred, 1, 0).mean()
         return avg_loss, avg_acc
