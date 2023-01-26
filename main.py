@@ -7,6 +7,12 @@ import numpy as np
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plot
 
+def early_stopping(loss, stopper_loss=1):
+        """
+           Stop the nueral network training if loss is 
+        """
+        return loss > stopper_loss
+
 def main(hyperparameters):
     # Initializing PCA, train and test sets.
     pca = PCA(n_components = hyperparameters.p)
@@ -35,6 +41,7 @@ def main(hyperparameters):
     best_mean, best_std = 0, 0
     train_losses = np.zeros((hyperparameters.epochs,))
     val_losses = np.zeros((hyperparameters.epochs,))
+    is_early_stopping = False
 
     # Initialize the k-fold dataset iterator.
     k_fold_iter = data.generate_k_fold_set((train_data_pca, train_labels), k=hyperparameters.k_folds)
@@ -71,6 +78,9 @@ def main(hyperparameters):
                 # Compute train loss and accuracy
                 val_acc /= (len(val_fold[0])//hyperparameters.batch_size)
                 val_loss /= (len(val_fold[0])//hyperparameters.batch_size)
+                # Exiting the training if early stopping used
+                if is_early_stopping and early_stopping(val_loss):
+                        break 
                 best_val_acc = max(best_val_acc, val_acc)
                 # Choosing the mean, standard deviation and best validation accuracy
                 if best_val_acc == val_acc:
