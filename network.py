@@ -154,6 +154,7 @@ class Network:
         p = self.forward(X)
         avg_loss = self.loss(p, y).mean()
         self.weights += lr*X.T.dot(y-p)/bs
+        #pred = np.where(p > 0.5, 1, 0)
         y = data.onehot_decode(y)
         pred = np.argmax(p, axis=1)+1
         avg_acc = np.where(y == pred, 1, 0).mean()
@@ -181,6 +182,7 @@ class Network:
         X, y = minibatch
         p = self.forward(X)
         avg_loss = self.loss(p, y).mean()
+        #pred = np.where(p > 0.5, 1, 0)
         y = data.onehot_decode(y)
         pred = np.argmax(p, axis=1)+1
         avg_acc = np.where(y == pred, 1, 0).mean()
